@@ -110,9 +110,9 @@
     if (!videoUrl) return;
 
     buttonEl.disabled = true;
-    buttonEl.innerText = "Analyzing via Gemini...";
-
-    showToast("Transcribing & extracting voter opinions with Gemini...");
+    buttonEl.innerText = "Analyzing via AI Pipeline...";
+    buttonEl.disabled = true;
+    showToast("Transcribing & extracting voter opinions with AI Pipeline...");
 
     chrome.runtime.sendMessage(
       { action: "ANALYZE_VIDEO", url: videoUrl },

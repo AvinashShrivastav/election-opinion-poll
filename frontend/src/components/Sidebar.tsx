@@ -67,7 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3.5 space-y-2">
           <div className="flex items-center space-x-2 text-slate-800">
             <FileSpreadsheet className="w-4 h-4 text-blue-600" />
-            <span className="text-xs font-bold">Gemini AI Analytics</span>
+            <span className="text-xs font-bold">AI Field Intelligence</span>
           </div>
           <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
             Verbatim sentiment extraction from Bihar ground report transcripts & multimodal audio.

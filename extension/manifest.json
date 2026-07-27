@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Election Opinion Pipeline for YouTube",
   "version": "1.0.0",
-  "description": "Extract voter stances, quotes, and political opinion data from YouTube ground report videos using Gemini LLM.",
+  "description": "Extract voter stances, quotes, and political opinion data from YouTube ground report videos using AI Engine.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",

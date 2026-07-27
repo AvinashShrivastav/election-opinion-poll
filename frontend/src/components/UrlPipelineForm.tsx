@@ -25,7 +25,7 @@ export const UrlPipelineForm: React.FC<UrlPipelineFormProps> = ({ onSuccess }) =
     }
 
     setIsLoading(true);
-    setStatusMsg({ type: "info", text: `Extracting transcripts & opinions via Gemini API for ${urls.length} video(s)...` });
+    setStatusMsg({ type: "info", text: `Extracting transcripts & opinions via AI Pipeline for ${urls.length} video(s)...` });
 
     try {
       const res = await fetch("http://127.0.0.1:8000/api/analyze", {

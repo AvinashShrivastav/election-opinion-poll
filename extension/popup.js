@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    statusText.innerText = "Extracting voter opinions via Gemini...";
+    statusText.innerText = "Extracting voter opinions via AI Pipeline...";
     statusText.style.color = "#2563eb";
     analyzeActiveBtn.disabled = true;
     analyzeCustomBtn.disabled = true;
