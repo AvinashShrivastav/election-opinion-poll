@@ -1,0 +1,16 @@
+.env
+.env*.local
+__pycache__/
+*.pyc
+.venv/
+venv/
+node_modules/
+.next/
+chart_images/
+temp_*.m4a
+*.mp3
+*.wav
+*.m4a
+.pytest_cache/
+.DS_Store
+*.log
