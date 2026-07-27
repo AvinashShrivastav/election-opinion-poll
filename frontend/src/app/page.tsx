@@ -1,172 +1,367 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { MacWindowChrome } from "../components/MacWindowChrome";
-import { Sidebar } from "../components/Sidebar";
 import ExecutiveSummaryHeader from "../components/ExecutiveSummaryHeader";
 import AnalyticsChartsSection from "../components/AnalyticsChartsSection";
 import VideoStoryArc from "../components/VideoStoryArc";
 import { VoterGrid } from "../components/VoterGrid";
 import { UrlPipelineForm } from "../components/UrlPipelineForm";
-import { RefreshCw, BarChart2, Video, Table } from "lucide-react";
+import { MacWindowChrome } from "../components/MacWindowChrome";
+import { Sidebar } from "../components/Sidebar";
+import { fetchBankipurData } from "../lib/dataHelper";
+import { Printer, ExternalLink, Quote, PlaySquare, Calendar, Users, LayoutDashboard, FileText, Search } from "lucide-react";
 
-export default function Page() {
-  const [activeTab, setActiveTab] = useState<string>("overview");
+export default function Home() {
+  const [activeView, setActiveView] = useState<"report" | "dashboard" | "videos" | "grid" | "ingest">("report");
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const fetchData = async () => {
+  const loadData = async () => {
     setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("http://127.0.0.1:8000/api/results");
-      if (!res.ok) throw new Error("Failed to fetch analytical results from backend.");
-      const resultData = await res.json();
-      setData(resultData);
-    } catch (err: any) {
-      setError(err.message || "Failed to load election data.");
-    } finally {
-      setLoading(false);
-    }
+    const result = await fetchBankipurData();
+    setData(result);
+    setLoading(false);
   };
 
   useEffect(() => {
-    fetchData();
+    loadData();
   }, []);
 
-  return (
-    <div className="min-h-screen bg-slate-100/90 text-slate-900 p-3 sm:p-6 font-sans antialiased selection:bg-blue-500 selection:text-white">
-      {/* macOS Main Window Chrome */}
-      <MacWindowChrome
-        title="Election Public Opinion & Media Analytics Platform"
-        onRefresh={fetchData}
-        onExport={() => window.open("http://127.0.0.1:8000/api/export", "_blank")}
-        isRefreshing={loading}
-      >
-        <div className="flex flex-col md:flex-row h-full min-h-[85vh]">
-          {/* Glassmorphism Sidebar */}
-          <Sidebar
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            totalRespondents={data?.summary_stats?.total_respondents || 0}
-            totalVideos={data?.summary_stats?.total_videos || 0}
-          />
+  if (loading || !data) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div className="text-center space-y-3">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm font-semibold text-slate-700">Loading Bankipur Election Intelligence Data...</p>
+        </div>
+      </div>
+    );
+  }
 
-          {/* Main Analytics Content Container */}
-          <main className="flex-1 p-4 md:p-8 overflow-y-auto space-y-8">
-            {/* Top Navigation Action Bar */}
-            <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setActiveTab("overview")}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    activeTab === "overview"
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200"
-                  }`}
-                >
-                  <BarChart2 className="w-3.5 h-3.5" />
-                  Executive Dashboard
-                </button>
-                <button
-                  onClick={() => setActiveTab("videos")}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    activeTab === "videos"
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200"
-                  }`}
-                >
-                  <Video className="w-3.5 h-3.5" />
-                  Video Story Arc ({data?.videos?.length || 0})
-                </button>
-                <button
-                  onClick={() => setActiveTab("voters")}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    activeTab === "voters"
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200"
-                  }`}
-                >
-                  <Table className="w-3.5 h-3.5" />
-                  Voter Data Grid ({data?.respondents?.length || 0})
-                </button>
-              </div>
+  const respondents = data.respondents || [];
+  const videos = data.videos || [];
+  const stats = data.summary_stats || {};
+
+  const filteredVideos = videos.filter((v: any) => {
+    const q = searchTerm.toLowerCase();
+    return (
+      v.title.toLowerCase().includes(q) ||
+      (v.channel || "").toLowerCase().includes(q) ||
+      (v.summary || "").toLowerCase().includes(q)
+    );
+  });
+
+  return (
+    <MacWindowChrome title="Bankipur Exit Poll & Public Opinion Platform">
+      <div className="flex h-full min-h-[calc(100vh-40px)] bg-slate-100/90 text-slate-900 font-sans">
+        {/* macOS Left Sidebar */}
+        <Sidebar activeTab={activeView} setActiveTab={(tab: any) => setActiveView(tab)} />
+
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8">
+          
+          {/* Top Mode Navigation Tabs */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/90 backdrop-blur-md p-4 rounded-2xl border border-slate-200 shadow-sm print:hidden">
+            <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
+              <button
+                onClick={() => setActiveView("report")}
+                className={`px-4 py-2 text-xs font-extrabold rounded-lg transition-all flex items-center gap-2 ${
+                  activeView === "report" ? "bg-blue-600 text-white shadow-xs" : "text-slate-700 hover:text-slate-900"
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+                Master Exit Poll Report (Default)
+              </button>
 
               <button
-                onClick={fetchData}
-                disabled={loading}
-                className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 shadow-xs transition-all flex items-center gap-1.5"
+                onClick={() => setActiveView("dashboard")}
+                className={`px-4 py-2 text-xs font-extrabold rounded-lg transition-all flex items-center gap-2 ${
+                  activeView === "dashboard" ? "bg-blue-600 text-white shadow-xs" : "text-slate-700 hover:text-slate-900"
+                }`}
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-blue-600" : ""}`} />
-                {loading ? "Refreshing..." : "Refresh"}
+                <LayoutDashboard className="w-4 h-4" />
+                Interactive Analyst Dashboard
               </button>
             </div>
 
-            {/* Error Alert */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-xs font-medium flex items-center justify-between">
-                <span>{error}</span>
-                <button onClick={fetchData} className="underline font-bold">Retry</button>
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => window.print()}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Printer className="w-4 h-4" />
+                Print / Save PDF
+              </button>
+            </div>
+          </div>
 
-            {/* Loading Skeleton */}
-            {loading && !data && (
-              <div className="space-y-6 animate-pulse">
-                <div className="h-32 bg-slate-200 rounded-2xl"></div>
-                <div className="grid grid-cols-4 gap-4">
-                  <div className="h-24 bg-slate-200 rounded-xl"></div>
-                  <div className="h-24 bg-slate-200 rounded-xl"></div>
-                  <div className="h-24 bg-slate-200 rounded-xl"></div>
-                  <div className="h-24 bg-slate-200 rounded-xl"></div>
+          {/* VIEW 1: MASTER EXIT POLL REPORT (DEFAULT) */}
+          {activeView === "report" && (
+            <div className="max-w-5xl mx-auto bg-white p-6 md:p-12 rounded-3xl border border-slate-200 shadow-lg space-y-10 print:shadow-none print:border-none print:p-0">
+              
+              {/* Cover Title Banner */}
+              <div className="border-b-2 border-slate-900 pb-6 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 bg-blue-600 text-white text-xs font-extrabold rounded-md uppercase tracking-wider">
+                    Official Master Exit Poll Report
+                  </span>
+                  <span className="text-xs text-slate-500 font-semibold">Bankipur Constituency 2026</span>
+                </div>
+
+                <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                  VOICE OF BANKIPUR 2026: Field Ground Reality & Electoral Exit Poll Report
+                </h1>
+
+                <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                  An Independent Multimodal Analysis of <strong>{stats.total_videos} Media Ground Reports</strong> and <strong>{stats.total_respondents} Verbatim Citizen Testimonies</strong> recorded across Bankipur, Patna.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-6 pt-2 text-xs text-slate-500 font-semibold border-t border-slate-100">
+                  <span>Scope: <strong>Bankipur Assembly Seat Only</strong></span>
+                  <span>Sample Size: <strong>N = {stats.total_respondents} Citizens</strong></span>
+                  <span>Total Field Reports: <strong>{stats.total_videos} Media Videos</strong></span>
                 </div>
               </div>
-            )}
 
-            {/* Main Views */}
-            {data && (
-              <>
-                {/* 1. Executive Overview Tab */}
-                {activeTab === "overview" && (
-                  <div className="space-y-8">
-                    {/* Executive Summary Header */}
-                    <ExecutiveSummaryHeader summaryStats={data.summary_stats} />
+              {/* Section 1: Executive Summary */}
+              <div className="space-y-4">
+                <h2 className="text-xl font-bold text-slate-900 border-l-4 border-blue-600 pl-3">
+                  1. Executive Summary & Ground Story
+                </h2>
 
-                    {/* Interactive Recharts Section */}
-                    <AnalyticsChartsSection
-                      respondents={data.respondents}
-                      partyCounts={data.summary_stats.party_counts}
-                      issueCounts={data.summary_stats.issue_counts}
-                    />
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-3 text-xs md:text-sm text-slate-700 leading-relaxed">
+                  <p>
+                    Welcome to the official field intelligence report for the <strong>Bankipur (बांकीपुर) Assembly Constituency</strong> in Patna, Bihar. 
+                    This report compiles analysis across <strong>{stats.total_videos} verified media field videos</strong> (from outlets including <em>ABP Live, Live Cities, Bharat Prime, Dainik Bhaskar, and News24</em>) and uncensored statements from <strong>{stats.total_respondents} local voters</strong>.
+                  </p>
 
-                    {/* Ground Report Video Case Studies */}
-                    <VideoStoryArc videos={data.videos} respondents={data.respondents} />
+                  <p>
+                    <strong>The Core Story of this Election:</strong><br/>
+                    Bankipur has traditionally been considered a safe fortress for the <strong>BJP</strong>, led by 10-year incumbent MLA Nitin Navin. However, ground reporting reveals a major undercurrent of change. 
+                    While the <strong>BJP holds a leading preference share of 39.7% (156 voters)</strong> driven by Prime Minister Modi's national brand identity and long-term constituency loyalty, 
+                    Prashant Kishor's <strong>Jan Suraaj</strong> has emerged as a powerhouse challenger with <strong>26.7% (105 voters)</strong>.
+                  </p>
 
-                    {/* Filterable Voter Data Grid */}
-                    <VoterGrid respondents={data.respondents} />
+                  <p>
+                    Jan Suraaj is capturing strong momentum among educated youth, students, and merchants who are deeply frustrated by <strong>exam paper leaks, student lathi-charges, unemployment, and candidate complacency</strong>. 
+                    Crucially, <strong>22.9% (90 voters) remain undecided</strong>, indicating that the election is far from settled and will be decided by late campaign momentum.
+                  </p>
+                </div>
+              </div>
+
+              {/* Section 2: Visual Analytics Charts */}
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-slate-900 border-l-4 border-blue-600 pl-3">
+                  2. Visual Analytics & Media House Coverage Breakdown
+                </h2>
+
+                <AnalyticsChartsSection
+                  respondents={respondents}
+                  partyCounts={stats.party_counts || {}}
+                  issueCounts={stats.issue_counts || {}}
+                />
+              </div>
+
+              {/* Section 3: All 42 Videos & All 393 Voter Testimonies */}
+              <div className="space-y-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                  <div>
+                    <h2 className="text-2xl font-black text-slate-900 border-l-4 border-blue-600 pl-3">
+                      3. Complete Video Master Archive ({filteredVideos.length} Videos • {stats.total_respondents} Voter Quotes)
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-1 pl-4">
+                      Full uncensored transcripts, party stances, key reasons, and direct YouTube video links for all ground reports.
+                    </p>
                   </div>
-                )}
 
-                {/* 2. Video Story Arc Tab */}
-                {activeTab === "videos" && (
-                  <VideoStoryArc videos={data.videos} respondents={data.respondents} />
-                )}
+                  <div className="relative min-w-[240px] print:hidden">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Filter testimonies..."
+                      className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
 
-                {/* 3. Voter Micro-Data Tab */}
-                {activeTab === "voters" && (
-                  <VoterGrid respondents={data.respondents} />
-                )}
+                <div className="space-y-8">
+                  {filteredVideos.map((video: any, vIdx: number) => {
+                    const videoResps = respondents.filter((r: any) => r.video_url === video.url);
 
-                {/* 4. Add Pipeline Tab */}
-                {activeTab === "pipeline" && (
-                  <UrlPipelineForm onSuccess={fetchData} />
-                )}
-              </>
-            )}
-          </main>
+                    const partyCounts: Record<string, number> = {};
+                    videoResps.forEach((r: any) => {
+                      partyCounts[r.preferred_party] = (partyCounts[r.preferred_party] || 0) + 1;
+                    });
+
+                    return (
+                      <div
+                        key={vIdx}
+                        className="bg-white rounded-2xl border-2 border-slate-200 shadow-sm overflow-hidden space-y-4 p-6 print:break-inside-avoid print:border-slate-300"
+                      >
+                        {/* Video Header Bar */}
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-slate-100 pb-4">
+                          <div className="space-y-2 flex-1">
+                            <div className="flex flex-wrap items-center gap-2 text-xs">
+                              <span className="font-extrabold text-blue-700 flex items-center gap-1 bg-blue-50 px-2.5 py-1 rounded-lg">
+                                <PlaySquare className="w-3.5 h-3.5" />
+                                {video.channel || "Ground Media Outlet"}
+                              </span>
+                              <span className="flex items-center gap-1 text-slate-500 font-semibold">
+                                <Calendar className="w-3.5 h-3.5" />
+                                {video.upload_date}
+                              </span>
+                              <span className="flex items-center gap-1 font-extrabold text-slate-800 bg-slate-100 px-2.5 py-0.5 rounded-md">
+                                <Users className="w-3.5 h-3.5 text-slate-500" />
+                                {video.respondent_count} Interviewed Citizens
+                              </span>
+                            </div>
+
+                            <h3 className="text-lg font-bold text-slate-900 leading-snug">
+                              {vIdx + 1}. {video.title}
+                            </h3>
+
+                            {video.summary && (
+                              <p className="text-xs text-slate-700 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <strong className="text-slate-900">Media Report Summary:</strong> "{video.summary}"
+                              </p>
+                            )}
+
+                            {/* Party Breakdown Pills */}
+                            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1">Voter Split:</span>
+                              {Object.entries(partyCounts).map(([party, count], pIdx) => (
+                                <span
+                                  key={pIdx}
+                                  className="px-2.5 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-lg text-xs font-bold flex items-center gap-1.5"
+                                >
+                                  <span>{party}</span>
+                                  <span className="px-1.5 py-0.2 bg-blue-600 text-white rounded-md font-extrabold text-[10px]">
+                                    {count}
+                                  </span>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* YouTube Watch Link */}
+                          <div className="shrink-0 pt-1 md:pt-0">
+                            <a
+                              href={video.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5"
+                            >
+                              Watch YouTube Video
+                              <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
+                            </a>
+                          </div>
+                        </div>
+
+                        {/* All Verbatim Voter Quotes for This Video */}
+                        <div className="space-y-3 pt-2">
+                          <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                            Verbatim Voter Testimonies ({videoResps.length} Interviewees)
+                          </h4>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {videoResps.map((r: any, rIdx: number) => (
+                              <div
+                                key={rIdx}
+                                className="bg-slate-50/90 p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between space-y-3"
+                              >
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-xs font-bold text-slate-900">{r.respondent_id}</span>
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="px-2 py-0.5 bg-blue-600 text-white font-bold text-[10px] rounded-md">
+                                        {r.preferred_party}
+                                      </span>
+                                      <span className="px-1.5 py-0.5 bg-white text-slate-600 text-[10px] font-semibold rounded-md border border-slate-200">
+                                        {r.stance_certainty}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <p className="text-xs font-medium text-slate-800 leading-relaxed">
+                                    <strong>Core Motivation:</strong> {r.key_reason}
+                                  </p>
+
+                                  {r.quote_original && (
+                                    <div className="bg-white p-3 rounded-lg border border-slate-200 text-xs text-slate-700 italic space-y-1">
+                                      <div className="flex gap-1.5">
+                                        <Quote className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                                        <p className="not-italic font-medium">"{r.quote_original}"</p>
+                                      </div>
+                                      {r.quote_english && (
+                                        <p className="text-[11px] text-slate-500 not-italic border-l-2 border-blue-400 pl-2 mt-1">
+                                          Translation: "{r.quote_english}"
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {r.key_issues && r.key_issues.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 pt-2 border-t border-slate-200">
+                                    {r.key_issues.map((issue: string, i: number) => (
+                                      <span
+                                        key={i}
+                                        className="px-2 py-0.5 bg-white text-slate-600 text-[10px] font-medium rounded-md border border-slate-200"
+                                      >
+                                        {issue}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Footer Note */}
+              <div className="pt-8 border-t border-slate-200 text-center text-xs text-slate-500 space-y-1">
+                <p className="font-bold text-slate-700">Bankipur Assembly Election Exit Poll & Field Intelligence Master Compendium</p>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW 2: INTERACTIVE ANALYST DASHBOARD */}
+          {activeView === "dashboard" && (
+            <div className="space-y-6">
+              <ExecutiveSummaryHeader summaryStats={stats} />
+              <AnalyticsChartsSection
+                respondents={respondents}
+                partyCounts={stats.party_counts || {}}
+                issueCounts={stats.issue_counts || {}}
+              />
+              <VideoStoryArc videos={videos} respondents={respondents} />
+            </div>
+          )}
+
+          {/* VIEW 3: VIDEO GALLERY */}
+          {activeView === "videos" && (
+            <VideoStoryArc videos={videos} respondents={respondents} />
+          )}
+
+          {/* VIEW 4: VOTER GRID */}
+          {activeView === "grid" && (
+            <VoterGrid respondents={respondents} />
+          )}
+
+          {/* VIEW 5: ADD YOUTUBE URLS */}
+          {activeView === "ingest" && (
+            <UrlPipelineForm onSuccess={loadData} />
+          )}
         </div>
-      </MacWindowChrome>
-    </div>
+      </div>
+    </MacWindowChrome>
   );
 }
