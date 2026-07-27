@@ -103,6 +103,8 @@ Bankipur has traditionally been considered a safe citadel for the **BJP**, repre
 
 ### 2. Sentiment & Party Preference Breakdown
 
+![Party Preference Share Graph](chart_images/party_preference_share.png)
+
 | Political Party / Stance | Voter Count ($N = 393$) | Vote Share (%) | Key Demographic & Driver |
 | :--- | :---: | :---: | :--- |
 | **BJP (Bharatiya Janata Party)** | **156** | **39.7%** | Core urban traders, senior citizens, Modi brand loyalists |
@@ -116,6 +118,8 @@ Bankipur has traditionally been considered a safe citadel for the **BJP**, repre
 
 ### 3. Decisive Voter Issues
 
+![Top Decisive Voter Issues Graph](chart_images/top_voter_issues.png)
+
 1. **Local Infrastructure & Drainage (118 Mentions):** Waterlogging near PMCH/Kadamkuan and road repair delays.
 2. **Inflation & Household Budget (58 Mentions):** High price pressure on small shopkeepers and homemakers.
 3. **Youth Unemployment & Exam Paper Leaks (52 Mentions):** The #1 issue driving young voters towards Jan Suraaj.
@@ -124,6 +128,8 @@ Bankipur has traditionally been considered a safe citadel for the **BJP**, repre
 ---
 
 ### 4. Media House Coverage Volume & Stance Split
+
+![Media House Coverage Graph](chart_images/media_house_split.png)
 
 | Media Outlet | Ground Videos | Interviewed Voters | Primary Sentiment Captured |
 | :--- | :---: | :---: | :--- |
@@ -173,6 +179,10 @@ election_opinion/
 ├── excel_reporter.py           # Multi-tab Excel report generator
 ├── generate_pdf_report.py      # PDF report compiler
 ├── extracted_data.json         # Master database (42 Bankipur Videos / 393 Voters)
+├── chart_images/               # High-resolution chart images for report
+│   ├── party_preference_share.png
+│   ├── top_voter_issues.png
+│   └── media_house_split.png
 ├── frontend/                   # Next.js 16 Web Dashboard Application
 │   ├── src/app/page.tsx        # Main Analytics Dashboard
 │   ├── src/app/report/page.tsx # UI PDF Master Report Page
