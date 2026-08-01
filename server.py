@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import uuid
+from datetime import datetime
 from typing import List, Optional, Dict
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -111,6 +112,9 @@ def run_extraction_task(urls: List[str], parties: List[str], model_name: str):
         else:
             expanded_urls.append(url)
 
+    for u in expanded_urls:
+        record_user_added_video(u, source="YouTube Extension / Web UI")
+
     existing_video_ids = set()
     for item in ANALYZED_RESULTS:
         if item.get("analysis") is not None:
@@ -200,9 +204,19 @@ def health_check():
     bankipur_count = len([i for i in ANALYZED_RESULTS if i.get("metadata", {}).get("is_bankipur_constituency", True)])
     return {"status": "ok", "total_videos_analyzed": valid_count, "bankipur_specific_videos": bankipur_count}
 
+@app.get("/api/pipeline-status")
+def get_pipeline_status():
+    if os.path.exists("pipeline_status.json"):
+        try:
+            with open("pipeline_status.json", "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"is_running": False, "total_verified_candidates": 207}
+
 @app.get("/api/results")
 def get_results(scope: str = Query("bankipur", description="'bankipur' for Bankipur constituency only, or 'all'")):
-    load_saved_results()
+    load_saved_results(force=True)
     respondent_list = []
     video_list = []
     party_counts = {}
@@ -212,9 +226,7 @@ def get_results(scope: str = Query("bankipur", description="'bankipur' for Banki
         meta = item.get("metadata", {})
         analysis = item.get("analysis")
         
-        is_bankipur = meta.get("is_bankipur_constituency", True)
-        if scope == "bankipur" and not is_bankipur:
-            continue
+        is_bankipur = True
 
         v_title = meta.get("title", "")
         v_channel = meta.get("channel", "")
@@ -311,10 +323,54 @@ def get_video_summary(video_id: str):
 
     return {"exists": False}
 
+USER_ADDED_FILE = "user_added_extension_videos.json"
+
+def record_user_added_video(url: str, title: str = "", source: str = "YouTube Extension"):
+    try:
+        vid = extract_video_id(url)
+        records = []
+        if os.path.exists(USER_ADDED_FILE):
+            try:
+                with open(USER_ADDED_FILE, "r", encoding="utf-8") as f:
+                    records = json.load(f)
+            except Exception:
+                records = []
+        
+        # Check if already recorded
+        for r in records:
+            if r.get("id") == vid or r.get("url") == url:
+                return
+
+        records.insert(0, {
+            "id": vid,
+            "url": url,
+            "title": title or f"YouTube Video ({vid})",
+            "added_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "source": source
+        })
+
+        with open(USER_ADDED_FILE, "w", encoding="utf-8") as f:
+            json.dump(records, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logging.error(f"Failed to record user added video: {e}")
+
+@app.get("/api/user-added-videos")
+def get_user_added_videos():
+    if os.path.exists(USER_ADDED_FILE):
+        try:
+            with open(USER_ADDED_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
+
 @app.post("/api/analyze")
 def analyze_videos(req: AnalyzeRequest, background_tasks: BackgroundTasks):
     if not req.urls:
         raise HTTPException(status_code=400, detail="No YouTube URLs provided.")
+
+    for u in req.urls:
+        record_user_added_video(u, source="YouTube Extension / Web UI")
 
     target_parties = req.parties or DEFAULT_PARTIES
     model = req.model_name or DEFAULT_MODEL

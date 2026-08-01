@@ -16,8 +16,8 @@ def generate_pdf():
     with open(DATA_FILE, "r", encoding="utf-8") as f:
         raw_data = json.load(f)
 
-    # Filter for Bankipur specific videos
-    bankipur_data = [item for item in raw_data if item.get("metadata", {}).get("is_bankipur_constituency", True) and item.get("analysis")]
+    # Include all analyzed videos in dataset
+    bankipur_data = [item for item in raw_data if item.get("analysis")]
 
     total_videos = len(bankipur_data)
     respondents = []

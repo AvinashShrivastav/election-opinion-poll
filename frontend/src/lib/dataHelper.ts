@@ -2,7 +2,7 @@ import rawDataset from "../data/extracted_data.json";
 
 export async function fetchBankipurData() {
   try {
-    const res = await fetch("http://127.0.0.1:8000/api/results?scope=bankipur", {
+    const res = await fetch("http://127.0.0.1:8000/api/results?scope=all", {
       cache: "no-store",
     });
     if (res.ok) {

@@ -115,6 +115,63 @@ export const UrlPipelineForm: React.FC<UrlPipelineFormProps> = ({ onSuccess }) =
           </button>
         </div>
       </form>
+
+      {/* User Added Videos History Log */}
+      <UserAddedVideosLog />
+    </div>
+  );
+};
+
+const UserAddedVideosLog = () => {
+  const [userVideos, setUserVideos] = useState<any[]>([]);
+
+  const fetchUserVideos = async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/user-added-videos");
+      if (res.ok) {
+        const data = await res.json();
+        setUserVideos(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchUserVideos();
+    const interval = setInterval(fetchUserVideos, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (userVideos.length === 0) return null;
+
+  return (
+    <div className="pt-4 border-t border-slate-200 space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+          <span>📂 Extension & Manual Added Videos Log ({userVideos.length})</span>
+        </h3>
+        <span className="text-[11px] font-mono text-slate-400">user_added_extension_videos.json</span>
+      </div>
+
+      <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+        {userVideos.map((item: any, idx: number) => (
+          <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
+            <div className="space-y-0.5 max-w-md truncate">
+              <p className="font-bold text-slate-900 truncate">{item.title || item.url}</p>
+              <p className="text-[10px] text-slate-500 font-mono">{item.added_at} • {item.source}</p>
+            </div>
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-600 hover:underline text-[11px] font-bold shrink-0 ml-2"
+            >
+              Open YouTube ↗
+            </a>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

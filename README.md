@@ -1,7 +1,7 @@
 # 🗳️ Election Opinion Poll & Field Media Intelligence System
 
 > **AI-Powered Public Opinion & Exit Poll Platform for Patna Bankipur Assembly Constituency (2026)**  
-> *Analyzed 42 Ground Report Media Videos and 393 Verbatim Citizen Testimonies*
+> *Analyzed 56 Ground Report Media Videos and 673 Verbatim Citizen Testimonies*
 
 ---
 
@@ -23,11 +23,11 @@
 
 1. **Multimodal Voter Sentiment Extraction Engine**:
    - **2-Layer Fail-Safe Pipeline**: Ingests YouTube text transcripts first, automatically falling back to **Gemini Multimodal Audio API (`gemini-2.5-flash`)** if captions are missing or rate-limited.
-   - Extracts voter party preferences (`BJP`, `Jan Suraaj`, `Undecided`, `RJD`, `JDU`, `Others`), stance certainty (*Firm / Leaning*), core decision motivators, key issues, and verbatim Hindi/Bhojpuri transcripts with English translations.
+   - Extracts voter party preferences (`BJP`, `Jan Suraaj`, `Undecided`, `Mahagathbandhan`, `Congress`, `RJD`, `JDU`, `Others`), stance certainty (*Firm / Leaning*), core decision motivators, key issues, and verbatim Hindi/Bhojpuri transcripts with English translations.
 
 2. **Next.js Executive Analytics Dashboard**:
    - Interactive Recharts visualizations: Party preference share, issue impact ranking, chronological sentiment trends, demographic donut charts, and **Media House Coverage & Bias Breakdown** (*ABP Live, Live Cities, Bharat Prime, Dainik Bhaskar, News24*).
-   - **Video Intelligence Gallery**: Card explorer with expandable voter testimonies for all 42 Bankipur ground report videos ($N = 393$ voters).
+   - **Video Intelligence Gallery**: Card explorer with expandable voter testimonies for all 56 Bankipur ground report videos ($N = 673$ voters).
 
 3. **YouTube Chrome Extension**:
    - Manifest V3 Chrome Extension (`extension/`) injecting **"＋ Add to Election Pipeline"** buttons and live **"📊 Analyzed (10 Voters)"** badges directly into YouTube watch pages and search results.
@@ -81,8 +81,8 @@ Open **[http://localhost:3000](http://localhost:3000)** in your browser!
 # 📜 Official Bankipur Election Exit Poll & Field Intelligence Report
 
 > **Scope:** Bankipur Assembly Constituency (Patna, Bihar)  
-> **Sample Size:** $N = 393$ Verbatim Interviewed Citizens  
-> **Data Sources:** 42 Verified Ground Report Videos  
+> **Sample Size:** $N = 673$ Verbatim Interviewed Citizens  
+> **Data Sources:** 56 Verified Ground Report Videos  
 
 ---
 
@@ -90,14 +90,15 @@ Open **[http://localhost:3000](http://localhost:3000)** in your browser!
 
 Welcome to the comprehensive field intelligence report for the **Bankipur (बांकीपुर) Assembly Constituency** in Patna, Bihar. 
 
-To compile this report, our AI system analyzed **42 verified media ground report videos** (from channels including *ABP Live, Live Cities Media, Bharat Prime, Dainik Bhaskar, and News24*) and extracted uncensored statements from **393 local voters** across Kadamkuan, PMCH, Hathwa Market, Nala Road, Rajendra Nagar, and local commercial markets.
+To compile this report, our AI system analyzed **56 verified media ground report videos** (from channels including *ABP Live, Live Cities Media, Bharat Prime, Dainik Bhaskar, News24, and NDTV*) and extracted uncensored statements from **673 local voters** across Kadamkuan, PMCH, Hathwa Market, Nala Road, Rajendra Nagar, and local commercial markets.
 
 #### 🎙️ Core Electoral Story:
 Bankipur has traditionally been considered a safe citadel for the **BJP**, represented by 10-year incumbent MLA Nitin Navin. However, ground reporting reveals a major undercurrent of change:
 
-- 🟠 **BJP Baseline (39.7% / 156 Voters):** The BJP maintains a leading position, driven by Prime Minister Narendra Modi's national popularity, central welfare schemes, and long-standing party loyalty among urban business owners and traditional voters.
-- 🔵 **Jan Suraaj Surge (26.7% / 105 Voters):** Prashant Kishor's new movement has emerged as a powerhouse challenger, capturing strong momentum among **educated youth, students, and frustrated middle-class voters**. They cite paper leaks, lack of local MLA accessibility, and unemployment as major reasons to demand *"Badlav"* (Change).
-- 🔘 **The Decisive Swing (22.9% / 90 Voters):** Over **1 in 4 voters remain uncommitted / undecided**, making Bankipur a highly competitive seat where final-week campaign momentum will determine the winner!
+- 🟠 **BJP Baseline (35.8% / 241 Voters):** The BJP maintains a leading position, driven by Prime Minister Narendra Modi's national popularity, central welfare schemes, and long-standing party loyalty among urban business owners and traditional voters.
+- 🔘 **The Decisive Swing (24.5% / 165 Voters):** Over **1 in 4 voters remain uncommitted / undecided**, making Bankipur a highly competitive seat where final-week campaign momentum will determine the winner!
+- 🔵 **Jan Suraaj Surge (15.6% / 105 Voters):** Prashant Kishor's new movement has emerged as a powerhouse challenger, capturing strong momentum among **educated youth, students, and frustrated middle-class voters**. They cite paper leaks, lack of local MLA accessibility, and unemployment as major reasons to demand *"Badlav"* (Change).
+- 🔴 **Mahagathbandhan & Allies (15.4% / 104 Voters):** Congress (38 voters / 5.6%), RJD (20 voters / 3.0%), and broader Mahagathbandhan supporters (46 voters / 6.8%) consolidate strong anti-incumbency sentiment focused on youth unemployment and price rise.
 
 ---
 

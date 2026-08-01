@@ -8,24 +8,29 @@ import { VoterGrid } from "../components/VoterGrid";
 import { UrlPipelineForm } from "../components/UrlPipelineForm";
 import { MacWindowChrome } from "../components/MacWindowChrome";
 import { Sidebar } from "../components/Sidebar";
+import { LiveTracker } from "../components/LiveTracker";
 import { fetchBankipurData } from "../lib/dataHelper";
-import { Printer, ExternalLink, Quote, PlaySquare, Calendar, Users, LayoutDashboard, FileText, Search } from "lucide-react";
+import { Printer, ExternalLink, Quote, PlaySquare, Calendar, Users, LayoutDashboard, FileText, Search, Activity } from "lucide-react";
 
 export default function Home() {
-  const [activeView, setActiveView] = useState<"report" | "dashboard" | "videos" | "grid" | "ingest">("report");
+  const [activeView, setActiveView] = useState<"report" | "dashboard" | "livetracker" | "videos" | "voters" | "pipeline">("livetracker");
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     const result = await fetchBankipurData();
-    setData(result);
-    setLoading(false);
+    if (result) setData(result);
+    if (!isSilent) setLoading(false);
   };
 
   useEffect(() => {
     loadData();
+    const interval = setInterval(() => {
+      loadData(true);
+    }, 4000); // Silent live sync every 4 seconds
+    return () => clearInterval(interval);
   }, []);
 
   if (loading || !data) {
@@ -52,18 +57,39 @@ export default function Home() {
     );
   });
 
+  const totalR = stats.total_respondents || 1;
+  const pCounts = stats.party_counts || {};
+  const bjpCount = pCounts["BJP"] || 0;
+  const bjpPct = ((bjpCount / totalR) * 100).toFixed(1);
+  const jsCount = pCounts["Jan Suraaj"] || 0;
+  const jsPct = ((jsCount / totalR) * 100).toFixed(1);
+  const undCount = (pCounts["Undecided / Neutral"] || 0) + (pCounts["Undecided"] || 0);
+  const undPct = ((undCount / totalR) * 100).toFixed(1);
+  const mgbCount = (pCounts["Mahagathbandhan"] || 0) + (pCounts["Congress"] || 0) + (pCounts["RJD"] || 0);
+  const mgbPct = ((mgbCount / totalR) * 100).toFixed(1);
+
   return (
     <MacWindowChrome title="Bankipur Exit Poll & Public Opinion Platform">
       <div className="flex h-full min-h-[calc(100vh-40px)] bg-slate-100/90 text-slate-900 font-sans">
         {/* macOS Left Sidebar */}
-        <Sidebar activeTab={activeView} setActiveTab={(tab: any) => setActiveView(tab)} />
+        <Sidebar activeTab={activeView} setActiveTab={(tab: any) => setActiveView(tab)} totalVideos={videos.length} totalRespondents={respondents.length} />
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8">
           
           {/* Top Mode Navigation Tabs */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/90 backdrop-blur-md p-4 rounded-2xl border border-slate-200 shadow-sm print:hidden">
-            <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
+            <div className="flex flex-wrap items-center gap-2 bg-slate-100 p-1 rounded-xl">
+              <button
+                onClick={() => setActiveView("livetracker")}
+                className={`px-4 py-2 text-xs font-black rounded-lg transition-all flex items-center gap-2 ${
+                  activeView === "livetracker" ? "bg-emerald-600 text-white shadow-xs" : "text-slate-700 hover:text-slate-900"
+                }`}
+              >
+                <Activity className="w-4 h-4 text-emerald-300 animate-pulse" />
+                🔴 Live Pipeline Tracker (207 Videos)
+              </button>
+
               <button
                 onClick={() => setActiveView("report")}
                 className={`px-4 py-2 text-xs font-extrabold rounded-lg transition-all flex items-center gap-2 ${
@@ -71,7 +97,7 @@ export default function Home() {
                 }`}
               >
                 <FileText className="w-4 h-4" />
-                Master Exit Poll Report (Default)
+                Master Exit Poll Report
               </button>
 
               <button
@@ -96,7 +122,10 @@ export default function Home() {
             </div>
           </div>
 
-          {/* VIEW 1: MASTER EXIT POLL REPORT (DEFAULT) */}
+          {/* VIEW 0: LIVE PIPELINE TRACKER */}
+          {activeView === "livetracker" && <LiveTracker />}
+
+          {/* VIEW 1: MASTER EXIT POLL REPORT */}
           {activeView === "report" && (
             <div className="max-w-5xl mx-auto bg-white p-6 md:p-12 rounded-3xl border border-slate-200 shadow-lg space-y-10 print:shadow-none print:border-none print:p-0">
               
@@ -139,13 +168,13 @@ export default function Home() {
                   <p>
                     <strong>The Core Story of this Election:</strong><br/>
                     Bankipur has traditionally been considered a safe fortress for the <strong>BJP</strong>, led by 10-year incumbent MLA Nitin Navin. However, ground reporting reveals a major undercurrent of change. 
-                    While the <strong>BJP holds a leading preference share of 39.7% (156 voters)</strong> driven by Prime Minister Modi's national brand identity and long-term constituency loyalty, 
-                    Prashant Kishor's <strong>Jan Suraaj</strong> has emerged as a powerhouse challenger with <strong>26.7% (105 voters)</strong>.
+                    While the <strong>BJP holds a leading preference share of {bjpPct}% ({bjpCount} voters)</strong> driven by Prime Minister Modi's national brand identity and long-term constituency loyalty, 
+                    Prashant Kishor's <strong>Jan Suraaj</strong> has captured <strong>{jsPct}% ({jsCount} voters)</strong> and <strong>Mahagathbandhan & Allies</strong> account for <strong>{mgbPct}% ({mgbCount} voters)</strong>.
                   </p>
 
                   <p>
                     Jan Suraaj is capturing strong momentum among educated youth, students, and merchants who are deeply frustrated by <strong>exam paper leaks, student lathi-charges, unemployment, and candidate complacency</strong>. 
-                    Crucially, <strong>22.9% (90 voters) remain undecided</strong>, indicating that the election is far from settled and will be decided by late campaign momentum.
+                    Crucially, <strong>{undPct}% ({undCount} voters) remain undecided</strong>, indicating that the election is highly competitive and will be decided by late campaign momentum.
                   </p>
                 </div>
               </div>

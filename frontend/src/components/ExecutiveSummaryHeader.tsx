@@ -16,10 +16,13 @@ export default function ExecutiveSummaryHeader({ summaryStats }: ExecutiveSummar
   const total = summaryStats.total_respondents || 1;
   const partyCounts = summaryStats.party_counts || {};
   
-  // Sort parties by count
-  const sortedParties = Object.entries(partyCounts).sort((a, b) => b[1] - a[1]);
-  const leader = sortedParties[0] || ["N/A", 0];
-  const runnerUp = sortedParties[1] || ["N/A", 0];
+  // Sort political parties (excluding Undecided category from party ranking)
+  const politicalParties = Object.entries(partyCounts)
+    .filter(([p]) => !p.includes("Undecided") && !p.includes("Neutral") && !p.includes("Not a voter"))
+    .sort((a, b) => b[1] - a[1]);
+  
+  const leader = politicalParties[0] || ["N/A", 0];
+  const runnerUp = politicalParties[1] || ["N/A", 0];
 
   const leaderPct = ((leader[1] / total) * 100).toFixed(1);
   const runnerPct = ((runnerUp[1] / total) * 100).toFixed(1);

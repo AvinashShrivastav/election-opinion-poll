@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { LayoutDashboard, Users, Video, PlusCircle, Globe, FileSpreadsheet } from "lucide-react";
+import { LayoutDashboard, Users, Video, PlusCircle, Globe, FileSpreadsheet, Activity } from "lucide-react";
 
 interface SidebarProps {
   activeTab: string;
@@ -17,6 +17,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   totalVideos = 0,
 }) => {
   const navItems = [
+    { id: "livetracker", label: "🔴 Live Pipeline Tracker", icon: Activity, badge: "207" },
     { id: "overview", label: "Executive Dashboard", icon: LayoutDashboard },
     { id: "videos", label: "Video Story Arc", icon: Video, badge: totalVideos },
     { id: "voters", label: "Voter Data Grid", icon: Users, badge: totalRespondents },
